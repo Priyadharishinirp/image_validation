@@ -1,0 +1,85 @@
+<!-- templates/team.html -->
+{% extends "base.html" %}
+
+{% block title %}Team Management - Unmodel QC Tool {% endblock %}
+
+{% block content %}
+<h1>Team Management</h1>
+<p class="lead">Manage user access and permissions for the Image Comparison Tool.</p>
+
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Users</h4>
+    </div>
+    <div class="card-body">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-info{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.id != current_user.id %}
+                                {% if user.role == 'admin' %}
+                                <a href="{{ url_for('demote_user', user_id=user.id) }}" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to demote this user to regular status?')">Demote to User</a>
+                                {% else %}
+                                <a href="{{ url_for('promote_user', user_id=user.id) }}" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to promote this user to admin status?')">Promote to Admin</a>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Current User</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No users found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0">Role Information</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Admin Role</h5>
+                <ul>
+                    <li>View and manage all user comparisons</li>
+                    <li>Promote and demote other users</li>
+                    <li>Access team management features</li>
+                    <li>Delete any comparison</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5>User Role</h5>
+                <ul>
+                    <li>Create and manage own comparisons</li>
+                    <li>Make comparisons public or private</li>
+                    <li>View public comparisons from other users</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

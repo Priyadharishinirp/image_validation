@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ comparison.title }} - Unmodel QC Tool{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ comparison.title }}</h1>
+    <p class="text-muted">
+        Created by {{ comparison.user.username }} on {{ comparison.created_at.strftime('%Y-%m-%d') }}
+        {% if comparison.is_public %}<span class="badge bg-success">Public</span>{% endif %}
+    </p>
+
+    {% if comparison.description %}
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Description</h5>
+            <p class="card-text">{{ comparison.description }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Original Images -->
+    <h2 class="mb-3">Original Images</h2>
+    <div class="row mb-4">
+        {% for i in [1, 2] %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Image {{ i }}</div>
+                <div class="card-body text-center">
+                    {% set img_path = comparison['image' ~ i ~ '_path'] %}
+                    {% if file_paths['image' ~ i ~ '_exists'] %}
+                    <img src="{{ url_for('static', filename=img_path.replace('static/', '')) }}"
+                         class="img-fluid" alt="Image {{ i }}">
+                    {% else %}
+                    <p class="text-muted">Image not available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+<!-- GIF Animation -->
+<h2 class="mb-3">GIF Animation (Color Difference)</h2>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Alternating Processed Images</span>
+                <div>
+                    {% if file_paths.gif_exists %}
+                    <a id="gif-download"
+                       href="{{ url_for('static', filename=comparison.gif_path.replace('static/', '')) }}"
+                       download
+                       class="btn btn-sm btn-outline-primary me-2">
+                        Download GIF
+                    </a>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="restartGif()">Restart GIF</button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body text-center">
+                {% if file_paths.gif_exists %}
+                <img id="comparisonGif"
+                     src="{{ url_for('static', filename=comparison.gif_path) }}">
+                {% else %}
+                <p class="text-muted">Animation not available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function restartGif() {
+        const img = document.getElementById('comparisonGif');
+        if (img) {
+            const originalSrc = img.src;
+            img.src = '';
+            setTimeout(() => {
+                img.src = originalSrc;
+            }, 50); // force reload
+        }
+    }
+</script>
+
+    <!-- Color Difference -->
+    <h2 class="mb-3">Color Difference Visualization</h2>
+    <div class="row mb-4">
+        {% for i in [1, 2] %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Image {{ i }} with Color Difference</div>
+                <div class="card-body text-center">
+                    {% set color_path = comparison['color_diff' ~ i ~ '_path'] %}
+                    {% if file_paths['color_diff' ~ i ~ '_exists'] %}
+                    <img src="{{ url_for('static', filename=color_path.replace('static/', '')) }}"
+                         class="img-fluid" alt="Color Difference {{ i }}">
+                    {% else %}
+                    <p class="text-muted">Image not available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Gray Difference -->
+    <h2 class="mb-3">Transparency Overlay Visualization</h2>
+    <div class="row mb-4">
+        {% for i in [1, 2] %}
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">Image {{ i }} with Overlays</div>
+                <div class="card-body text-center">
+                    {% set gray_path = comparison['gray_diff' ~ i ~ '_path'] %}
+                    {% if file_paths['gray_diff' ~ i ~ '_exists'] %}
+                    <img src="{{ url_for('static', filename=gray_path.replace('static/', '')) }}"
+                         class="img-fluid" alt="Gray Difference {{ i }}">
+                    {% else %}
+                    <p class="text-muted">Image not available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Controls -->
+    <div class="mt-4 mb-5">
+        {% if current_user.is_authenticated and (current_user.id == comparison.user_id or current_user.role == 'admin') %}
+        <a href="{{ url_for('delete_comparison', comparison_id=comparison.id) }}" class="btn btn-danger"
+           onclick="return confirm('Are you sure you want to delete this comparison?')">Delete Comparison</a>
+        {% endif %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+

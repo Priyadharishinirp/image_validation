@@ -1,0 +1,50 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Unmodel QC Tool{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Your Image Comparisons</h1>
+    <a href="{{ url_for('compare') }}" class="btn btn-primary">New Comparison</a>
+</div>
+
+{% if comparisons %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Created</th>
+                <th>Visibility</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comparison in comparisons %}
+            <tr>
+                <td>{{ comparison.title }}</td>
+                <td>{{ comparison.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if comparison.is_public %}
+                    <span class="badge bg-success">Public</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Private</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('view_comparison', comparison_id=comparison.id) }}" class="btn btn-sm btn-info">View</a>
+                    <a href="{{ url_for('delete_comparison', comparison_id=comparison.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this comparison?')">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <p>You haven't created any comparisons yet. Get started by clicking the "New Comparison" button.</p>
+</div>
+{% endif %}
+{% endblock %}
+
